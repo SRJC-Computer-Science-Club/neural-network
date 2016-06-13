@@ -1,0 +1,120 @@
+package club.srjccs.neuralnet;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Point;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+public class Node
+{
+	private static final int ARROW_SIZE = NeuralNetwork.ARROW_SIZE;
+	private static final double ARROW_ANGLE = NeuralNetwork.ARROW_ANGLE;
+	private ArrayList<Connection> inputs;
+	
+	private int radius;
+	private int x;
+	private int y;
+	
+	Node(int x, int y, int radius)
+	{
+		inputs = new ArrayList<Connection>();
+		
+		this.x = x;
+		this.y = y;
+		this.radius = radius;
+	}
+	
+	public void addInput(Node node)
+	{
+		inputs.add(new Connection(node));
+	}
+	
+	public void removeInput(Node node)
+	{
+		inputs.remove(node);
+	}
+	
+	private class Connection
+	{
+		public Node node;
+		public float strength;
+		
+		Connection(Node node)
+		{
+			this.node = node;
+			this.strength = 1.0f;
+		}
+		
+		Connection(Node node, float strength)
+		{
+			this.node = node;
+			this.strength = 1.0f;
+		}
+	}
+	
+	public void setRadius(int radius)
+	{
+		this.radius = radius;
+	}
+	
+	public int getRadius()
+	{
+		return radius;
+	}
+	
+	public Point getPosition()
+	{
+		return new Point(x, y);
+	}
+	
+	public int getX()
+	{
+		return x;
+	}
+	
+	public int getY()
+	{
+		return y;
+	}
+	
+	public void draw(Graphics g)
+	{
+		g.setColor(Color.WHITE);
+		g.fillOval(x - radius, y - radius, 2 * radius, 2 * radius);
+		g.setColor(Color.BLACK);
+		g.drawOval(x - radius, y - radius, 2 * radius, 2 * radius);
+		
+		Iterator<Node> it = inputs.iterator();
+		while(it.hasNext())
+		{
+			Node node = it.next();
+			Point p1 = node.getPosition();
+			Point p2 = this.getPosition();
+			double theta = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+			
+			p1.x += (int)((node.getRadius() + 1) * Math.cos(theta));
+			p1.y += (int)((node.getRadius() + 1) * Math.sin(theta));
+			p2.x -= (int)((this.getRadius() + 1) * Math.cos(theta));
+			p2.y -= (int)((this.getRadius() + 1) * Math.sin(theta));
+
+			Point p3 = new Point(
+					(int)(p2.x - ARROW_SIZE * Math.cos(theta - ARROW_ANGLE)),
+					(int)(p2.y - ARROW_SIZE * Math.sin(theta - ARROW_ANGLE)));
+			
+			Point p4 = new Point(
+					(int)(p2.x - ARROW_SIZE * Math.cos(theta + ARROW_ANGLE)),
+					(int)(p2.y - ARROW_SIZE * Math.sin(theta + ARROW_ANGLE)));
+			
+			g.drawLine(p1.x, p1.y, p2.x, p2.y);
+			g.drawLine(p3.x, p3.y, p2.x, p2.y);
+			g.drawLine(p4.x, p4.y, p2.x, p2.y);
+		}
+	}
+	
+	public void drawSelection(Graphics g)
+	{
+		g.setColor(Color.RED);
+		g.drawOval(x - radius, y - radius, 2 * radius, 2 * radius);
+	}
+}
